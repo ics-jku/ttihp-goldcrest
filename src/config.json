@@ -21,7 +21,7 @@
   "SYNTH_MEMORY_MAX_BITS": 4096,
 
   "//": "Setting to 1 may help decrease design area utilization / speed up routing:",
-  "ABC_AREA": 0,
+  "ABC_AREA": 1,
 
   "//": "Configuration docs: https://openroad-flow-scripts.readthedocs.io/en/latest/user/FlowVariables.html",
 
