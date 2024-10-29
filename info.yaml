@@ -1,10 +1,10 @@
 # Tiny Tapeout project information
 project:
-  title:        ""      # Project title
-  author:       ""      # Your name
-  discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  ""      # One line description of what your project does
-  language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
+  title:        "Goldcrest RISC-V"
+  author:       "Felix Roithmayr, Lucas Klemmer, Daniel Große"
+  discord:      "lucask0421"
+  description:  "A microcoded RISC-V based on SUBLEQ"
+  language:     "Verilog"
   clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
