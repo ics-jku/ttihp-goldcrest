@@ -5,51 +5,61 @@ project:
   discord:      "lucask0421"
   description:  "A microcoded RISC-V based on SUBLEQ"
   language:     "Verilog"
-  clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
+  clock_hz:     20000000       # Clock frequency in Hz (or 0 if not applicable)
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
-  tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2 or 6x2
+  tiles: "3x2"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2 or 6x2
 
   # Your top module name must start with "tt_um_". Make it unique by including your github username:
-  top_module:  "tt_um_example"
+  top_module:  "tt_um_froith_goldcrest"
 
   # List your project's source files here.
   # Source files must be in ./src and you must list each source file separately, one per line.
   # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
   source_files:
-    - "project.v"
+    - "tt_um_froith_goldcrest.v"
+    - "top_ihp.v"
+    - "wb_oisc.v"
+    - "wb_emem.v"
+    - "wb_imem.v"
+    - "wb_spi.v"
+    - "wb_uart.v"
+    - "wb_gpio.v"
+    - "uart_tx.v"
+    - "uart_rx.v"
+    - "decoder.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
   # Inputs
-  ui[0]: ""
-  ui[1]: ""
-  ui[2]: ""
-  ui[3]: ""
-  ui[4]: ""
-  ui[5]: ""
-  ui[6]: ""
-  ui[7]: ""
+  ui[0]: "UART rx"
+  ui[1]: "External SPI ROM MISO"
+  ui[2]: "External SPI RAM MISO"
+  ui[3]: "Other SPI MISO"
+  ui[4]: "GPIO in 0"
+  ui[5]: "GPIO in 1"
+  ui[6]: "GPIO in 2"
+  ui[7]: "GPIO in 3"
 
   # Outputs
-  uo[0]: ""
-  uo[1]: ""
-  uo[2]: ""
-  uo[3]: ""
-  uo[4]: ""
-  uo[5]: ""
-  uo[6]: ""
-  uo[7]: ""
+  uo[0]: "UART tx"
+  uo[1]: "External SPI ROM SCK"
+  uo[2]: "External SPI ROM MOSI"
+  uo[3]: "External SPI ROM CS"
+  uo[4]: "External SPI RAM SCK"
+  uo[5]: "External SPI RAM MOSI"
+  uo[6]: "External SPI RAM CS"
+  uo[7]: "Other SPI SCK"
 
   # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
+  uio[0]: "Other SPI MOSI"
+  uio[1]: "Other SPI CS1"
+  uio[2]: "Other SPI CS2"
+  uio[3]: "Other SPI CS3"
+  uio[4]: "GPIO out 0"
+  uio[5]: "GPIO out 1"
+  uio[6]: "GPIO out 2"
+  uio[7]: "GPIO out 3"
 
 # Do not change!
 yaml_version: 6
