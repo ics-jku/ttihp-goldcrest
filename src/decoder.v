@@ -10,7 +10,7 @@ module decoder (
     output wire [31:0] decoder_imm,
     output wire [ 4:0] decoder_rs1,
     output wire [ 4:0] decoder_rs2,
-    output wire [ 4:0] decoder_rd,
+    output wire [ 3:0] decoder_rd,
     output wire [ 3:0] decoder_strb,
     output wire        decoder_sign_extend,
     output wire        decoder_load,
@@ -74,7 +74,7 @@ module decoder (
    assign decoder_funct3 = instruction[14:12];
    assign decoder_rs2 = (itype == 3'd5 ? 5'b0 : instruction[24:20]);
    assign decoder_rs1 = decoder_renable ? decoder_inst[19:15] : instruction[19:15];
-   assign decoder_rd = ((itype == 3'd1 | itype == 3'd2) ? 5'b0 : instruction[11:7]);
+   assign decoder_rd = ((itype == 3'd1 | itype == 3'd2) ? 4'b0 : instruction[10:7]);
    assign decoder_res = decoded[12];
    assign decoder_load = decoded[11];
    assign decoder_store = decoded[10];

@@ -1,21 +1,21 @@
-`define TMP0 6'd0
-`define RVPC 6'd1
-`define SRC1 6'd2
-`define TMP1 6'd3
-`define SRC2 6'd4
-`define TMP2 6'd5
-`define TMP3 6'd6
-`define TMP4 6'd7
-`define IMMI 6'd8
-`define TMP5 6'd9
-`define ONE 6'd10
-`define WORD 6'd11
-`define INCR 6'd12
-`define NEXT 6'd13
-`define TMP6 6'd14
+`define TMP0 5'd0
+`define RVPC 5'd1
+`define SRC1 5'd2
+`define TMP1 5'd3
+`define SRC2 5'd4
+`define TMP2 5'd5
+`define TMP3 5'd6
+`define TMP4 5'd7
+`define IMMI 5'd8
+`define TMP5 5'd9
+`define ONE 5'd10
+`define WORD 5'd11
+`define INCR 5'd12
+`define NEXT 5'd13
+`define TMP6 5'd14
 
 `define RV_REGS(DEST) {1'b1, DEST}
-`define MICRO_REGS(DEST) {2'b0, DEST}
+`define MICRO_REGS(DEST) {1'b0, DEST}
 
 module wb_oisc #(parameter CLK_DIV = 2)(
 	                                input wire         clk,
@@ -66,30 +66,30 @@ module wb_oisc #(parameter CLK_DIV = 2)(
 
    // ------------------------------------------------------------
    /** register bank */
-   reg [31:0]                                              regs [63:0];
+   reg [31:0]                                              regs [31:0];
 
    // we need this to force the regbank into the vcd
    //integer                                                 idx;
    //initial begin
    //   #0 for(idx = 0; idx < 16; idx = idx+1) $dumpvars(0, regs[idx]);
    //   #0 for(idx = 32; idx < 64; idx = idx+1) $dumpvars(0, regs[idx]);
-   //end
+   //endreg [31:0]                                              regs [63:0];
 
-   wire [5:0] 		      reg_wa = 
+   wire [4:0] 		      reg_wa = 
 			      state[PLACE_SRC1_BIT] ? `SRC1 :
                state[PLACE_SRC2_BIT] ? (decoder_rtype ? `IMMI : `SRC2) :
 			      state[PLACE_IMM_BIT]  ? (decoder_rtype ? `SRC2 : `IMMI) :
                               state[EXECUTE_BIT] & micro_done & decoder_res           ? `RV_REGS(decoder_rd) :
                               state[MEMORY_BIT] & decoder_load                        ? `RV_REGS(decoder_rd) :
-			      (state[EXECUTE_BIT] & micro_state[MICRO_WRITEBACK_BIT]) ? `MICRO_REGS(micro_res_addr) : 6'd32;
-   wire [5:0]                 reg_ra = 
+			      (state[EXECUTE_BIT] & micro_state[MICRO_WRITEBACK_BIT]) ? `MICRO_REGS(micro_res_addr) : 5'd16;
+   wire [4:0]                 reg_ra = 
                               state[FETCH_RVPC_BIT]                                   ? `RVPC :
                               state[FETCH_INSTR_BIT] & wb_ack_i                       ? `RV_REGS(decoder_rs1) :
 			      state[PLACE_SRC1_BIT]                                   ? `RV_REGS(decoder_rs2) : 
-			      state[EXECUTE_BIT] & micro_state[MICRO_EXECUTE_BIT]     ? `MICRO_REGS(micro_op[15:12]) : 6'd32;
-   wire [5:0]                 reg_rb =
+			      state[EXECUTE_BIT] & micro_state[MICRO_EXECUTE_BIT]     ? `MICRO_REGS(micro_op[15:12]) : 5'd16;
+   wire [4:0]                 reg_rb =
                               (state[EXECUTE_BIT] & micro_state[MICRO_EXECUTE_BIT])   ? `MICRO_REGS(micro_op[11:8]) :
-                              micro_done                                              ? 6'b000100 : 6'd32;
+                              micro_done                                              ? 5'b000100 : 5'd16;
    wire [31:0]                reg_wdata = 
                               (state[PLACE_SRC1_BIT] | state[PLACE_SRC2_BIT]) ? op_a : 
 			      (state[PLACE_IMM_BIT])                          ? decoder_imm : 
@@ -99,7 +99,7 @@ module wb_oisc #(parameter CLK_DIV = 2)(
 					| state[PLACE_IMM_BIT]
 					| (state[FETCH_RVPC_BIT])
 					| (state[EXECUTE_BIT] & micro_state[MICRO_WRITEBACK_BIT])
-					| (state[MEMORY_BIT] & decoder_res)) & (reg_wa != 6'd32);
+					| (state[MEMORY_BIT] & decoder_res)) & (reg_wa != 5'd16);
 
    // Initialize regbank
    integer                    i;
@@ -109,8 +109,8 @@ module wb_oisc #(parameter CLK_DIV = 2)(
       end
       // SUBLEQ REGS
       regs[1]  = 32'h40000000; // RISC-V pc
-      regs[34] = 32'h80008000; // RISC-V sp
-      regs[35] = 32'h80000800; // RISC-V gp
+      regs[18] = 32'h80008000; // RISC-V sp
+      regs[19] = 32'h80000800; // RISC-V gp
 
 
       regs[8] = -32'd4; // preload immidiate reg
@@ -190,8 +190,8 @@ module wb_oisc #(parameter CLK_DIV = 2)(
          end
          // SUBLEQ REGS
          regs[1]  <= 32'h40000000; // RISC-V pc
-         regs[34] <= 32'h80008000; // RISC-V sp
-         regs[35] <= 32'h80000800; // RISC-V gp
+         regs[18] <= 32'h80008000; // RISC-V sp
+         regs[19] <= 32'h80000800; // RISC-V gp
 
 
          regs[8] <= -32'd4; // preload immidiate reg
@@ -250,7 +250,7 @@ module wb_oisc #(parameter CLK_DIV = 2)(
    wire [2:0]          decoder_funct3;
    wire                decoder_funct7;
    wire                decoder_res;		// From decoder of decoder.v
-   wire [4:0]          decoder_rd;		// From decoder of decoder.v
+   wire [3:0]          decoder_rd;		// From decoder of decoder.v
    wire [4:0]          decoder_rs1;		// From decoder of decoder.v
    wire [4:0]          decoder_rs2;		// From decoder of decoder.v
    wire [31:0]         decoder_imm;
