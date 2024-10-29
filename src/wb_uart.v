@@ -40,7 +40,6 @@ module wb_uart(
          if (state == S_IDLE) begin
             if (tx_start) begin
                state <= S_WORKING_TX;
-               $write("%c", dat_i[7:0]);
             end else if (rx_start) begin
                state <=S_WORKING_RX;
             end
