@@ -251,8 +251,8 @@ module wb_oisc #(parameter CLK_DIV = 2)(
    wire                decoder_funct7;
    wire                decoder_res;		// From decoder of decoder.v
    wire [3:0]          decoder_rd;		// From decoder of decoder.v
-   wire [4:0]          decoder_rs1;		// From decoder of decoder.v
-   wire [4:0]          decoder_rs2;		// From decoder of decoder.v
+   wire [3:0]          decoder_rs1;		// From decoder of decoder.v
+   wire [3:0]          decoder_rs2;		// From decoder of decoder.v
    wire [31:0]         decoder_imm;
    wire [3:0]          decoder_strb;
    wire                decoder_sign_extend;
