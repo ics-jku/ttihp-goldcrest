@@ -62,7 +62,7 @@ module wb_oisc #(parameter CLK_DIV = 2)(
    /** microcode ROM */
    reg [15:0]                                              rom [0:255];
 
-   initial $readmemh("microcode/microcode.hex", rom);
+   initial $readmemh("microcode.hex", rom);
 
    // ------------------------------------------------------------
    /** register bank */
