@@ -9,7 +9,7 @@ module decoder (
     output wire        decoder_res,
     output wire        decoder_funct7,
     output wire [ 2:0] decoder_funct3,
-    output wire [ 8:0] decoder_pc,
+    output wire [ 7:0] decoder_pc,
     output wire [31:0] decoder_imm,
     output wire [ 4:0] decoder_rs1,
     output wire [ 4:0] decoder_rs2,
@@ -22,7 +22,7 @@ module decoder (
 );
 
 
-   reg [31:0]                     instruction;
+   reg [31:0]                     instruction = 0;
    // the microcode for the decoder
    /* verilator lint_off LITENDIAN */
    localparam [0:(128*16)-1] rom = {
@@ -39,24 +39,14 @@ module decoder (
    reg [15:0]                     decoded = 16'b0;
 
    localparam opcode_R =      5'b01100; // opshort = 3'b110                
-   /* verilator lint_off UNUSEDPARAM */
    localparam opcode_I =      5'b00100; // opshort = 3'b010                
-   localparam opcode_I_load = 5'b00000; // opshort = 3'b000                
-   localparam opcode_S =      5'b01000; // opshort = 3'b100    func7 = 0        
-   /* verilator lint_on UNUSEDPARAM */
+   //localparam opcode_I_load = 5'b00000; // opshort = 3'b000                
+   //localparam opcode_S =      5'b01000; // opshort = 3'b100    func7 = 0        
    localparam opcode_B =      5'b11000; // opshort = 3'b100    func7 = 1    
    localparam opcode_J =      5'b11011; // opshort = 3'b101    func7 = 0
    localparam opcode_JALR =   5'b11001; // opshort = 3'b101    func7 = 1
    localparam opcode_LUI =    5'b01101; // opshort = 3'b111          
    localparam opcode_AUIPC =  5'b00101; // opshort = 3'b011          
-
-
-   /* verilator lint_off UNUSEDSIGNAL */
-   wire [6:0] dummy1;
-   assign dummy1 = instruction[6:0];
-   wire [9:8] dummy2;
-   assign dummy2 = decoded[9:8];
-   /* verilator lint_on UNUSEDSIGNAL */
 
 
    // opshort = 3'b001 is illegal, but does not happen with valid RISCV-32I Instructions
@@ -95,8 +85,16 @@ module decoder (
       
    end
 
+   /* verilator lint_off UNUSEDSIGNAL */
+   wire [9:8] dummy1;
+   assign dummy1 = decoded[9:8];
+   wire [6:0] dummy2;
+   assign dummy2 = instruction[6:0];
+   /* verilator lint_on UNUSEDSIGNAL */
+   
+
    //wire is_jalr = instruction[6:2] == 5'b11001;
-   assign decoder_pc = {1'b0, decoded[7:0]};
+   assign decoder_pc = decoded[7:0];
    // assign decoder_funct7 = ((opcode == 7'b0010011) && (funct3 == 3'b101)) || 
    //                         ((opcode == 7'b0110011) && ((funct3 == 3'b000) || (funct3 == 3'b101))) ? instruction[30] : 0;
    assign decoder_funct7 = ((opcode == opcode_R) || (opcode == opcode_I && (decoder_inst[14:12] == 3'b001 || decoder_inst[14:12] == 3'b101))) ? instruction[30] : 1'b0;

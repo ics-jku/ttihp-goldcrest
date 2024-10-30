@@ -21,7 +21,7 @@
 `define RV_REGS(DEST) {1'b1, DEST}
 `define MICRO_REGS(DEST) {2'b00, DEST}
 
-module wb_oisc #(parameter CLK_DIV = 2)(
+module wb_oisc (
 	                                input wire         clk,
 	                                input wire         rst_n,
 
@@ -33,6 +33,15 @@ module wb_oisc #(parameter CLK_DIV = 2)(
                                         output wire        wb_we_o,
                                         output reg [31:0]  wb_dat_o,
                                         output wire [31:0] wb_adr_o);
+
+   /* verilator lint_off UNUSEDSIGNAL */
+   wire dummy1;
+   assign dummy1 = decoder_sign_extend;
+   wire dummy2;
+   assign dummy1 = decoder_funct7;
+   wire dummy3;
+   assign dummy3 = res[32];
+   /* verilator lint_on UNUSEDSIGNAL */
 
    // RISC-V IF state definitions
    localparam FETCH_RVPC_BIT      = 0;
@@ -50,17 +59,17 @@ module wb_oisc #(parameter CLK_DIV = 2)(
    localparam MICRO_NB_STATES     = 3;
 
    localparam FETCH_RVPC          = 1 << FETCH_RVPC_BIT;
-   localparam FETCH_INSTR         = 1 << FETCH_INSTR_BIT;
-   localparam PLACE_SRC1          = 1 << PLACE_SRC1_BIT;
-   localparam PLACE_SRC2          = 1 << PLACE_SRC2_BIT;
-   localparam PLACE_IMM           = 1 << PLACE_IMM_BIT;
-   localparam EXECUTE             = 1 << EXECUTE_BIT;
+   //localparam FETCH_INSTR         = 1 << FETCH_INSTR_BIT;
+   //localparam PLACE_SRC1          = 1 << PLACE_SRC1_BIT;
+   //localparam PLACE_SRC2          = 1 << PLACE_SRC2_BIT;
+   //localparam PLACE_IMM           = 1 << PLACE_IMM_BIT;
+   //localparam EXECUTE             = 1 << EXECUTE_BIT;
    localparam MEMORY              = 1 << MEMORY_BIT;
 
    // SUBLEQ core FSM states
    localparam MICRO_FETCH         = 1 << MICRO_FETCH_BIT;
-   localparam MICRO_EXECUTE       = 1 << MICRO_EXECUTE_BIT;
-   localparam MICRO_WRITEBACK     = 1 << MICRO_WRITEBACK_BIT;
+   //localparam MICRO_EXECUTE       = 1 << MICRO_EXECUTE_BIT;
+   //localparam MICRO_WRITEBACK     = 1 << MICRO_WRITEBACK_BIT;
 
    // ------------------------------------------------------------
    /** microcode ROM */
@@ -144,8 +153,8 @@ module wb_oisc #(parameter CLK_DIV = 2)(
 
    // ----------------------------------------
    
-   wire [31:0] wire_a = (reg_ra > 6'd15) && (reg_ra < 6'd33) ? 32'd0 : regs[reg_ra];
-   wire [31:0] wire_b = (reg_rb > 6'd15) && (reg_rb < 6'd33) ? 32'd0 : regs[reg_rb];
+   //wire [31:0] wire_a = (reg_ra > 6'd15) && (reg_ra < 6'd33) ? 32'd0 : regs[reg_ra];
+   //wire [31:0] wire_b = (reg_rb > 6'd15) && (reg_rb < 6'd33) ? 32'd0 : regs[reg_rb];
 
    reg [3:0]                  micro_res_addr;
    
@@ -154,7 +163,7 @@ module wb_oisc #(parameter CLK_DIV = 2)(
          micro_res_addr <= 0;
       end else begin
          if (state[PLACE_SRC2_BIT]) begin
-            micro_pc <= decoder_micro_pc[7:0];
+            micro_pc <= decoder_micro_pc;
          end else if (state[EXECUTE_BIT] & micro_state[MICRO_WRITEBACK_BIT] & ~micro_done) begin
             if ($signed(op_b) <= $signed(op_a)) begin
                      if (op_jump[7]) begin
@@ -180,7 +189,30 @@ module wb_oisc #(parameter CLK_DIV = 2)(
       
       if (!rst_n) begin
          micro_op <= 0;
-         
+      end else begin
+         if (state[EXECUTE_BIT] & micro_state[MICRO_FETCH_BIT] | micro_done) begin
+            micro_op <= rom[micro_pc*16+:16];
+         end
+      end
+   end
+   
+   // process for reading from regbank
+   always @(posedge clk or negedge rst_n) begin
+      if (!rst_n) begin
+         op_a <= 0;
+         op_b <= 0;
+      end else begin
+         if (!(state[FETCH_INSTR_BIT] && !wb_ack_i)) begin
+            op_a <= regs[reg_ra];
+            op_b <= regs[reg_rb];
+         end
+      end
+      
+   end
+
+   // process for writing to the regbank
+   always @(posedge clk or negedge rst_n) begin
+      if (!rst_n) begin
          // SUBLEQ REGS
          regs[0] <= 32'd0;          // TMP0
          regs[1]  <= 32'h40000000;  // RISC-V pc
@@ -231,30 +263,26 @@ module wb_oisc #(parameter CLK_DIV = 2)(
          regs[61] <= 32'd0;         // X29
          regs[62] <= 32'd0;         // X30
          regs[63] <= 32'd0;         // X31
-      end else begin
-         if (state[EXECUTE_BIT] & micro_state[MICRO_FETCH_BIT] | micro_done) begin
-            micro_op <= rom[micro_pc*16+:16];
-         end
-      end
-   end
-   
-   // process for reading from regbank
-   always @(posedge clk or negedge rst_n) begin
-      if (!rst_n) begin
-         op_a <= 0;
-         op_b <= 0;
-      end else begin
-         if (!(state[FETCH_INSTR_BIT] && !wb_ack_i)) begin
-            op_a <= wire_a;
-            op_b <= wire_b;
-         end
-      end
-      
-   end
 
-   // process for writing to the regbank
-   always @(posedge clk or negedge rst_n) begin
-      if (rst_n) begin
+         // all unused/zero registers
+         regs[16] <= 32'd0;         // 
+         regs[17] <= 32'd0;         // 
+         regs[18] <= 32'd0;         // 
+         regs[19] <= 32'd0;         // 
+         regs[20] <= 32'd0;         // 
+         regs[21] <= 32'd0;         // 
+         regs[22] <= 32'd0;         // 
+         regs[23] <= 32'd0;         // 
+         regs[24] <= 32'd0;         // 
+         regs[25] <= 32'd0;         // 
+         regs[26] <= 32'd0;         // 
+         regs[27] <= 32'd0;         // 
+         regs[28] <= 32'd0;         // 
+         regs[29] <= 32'd0;         // 
+         regs[30] <= 32'd0;         // 
+         regs[31] <= 32'd0;         // 
+         regs[32] <= 32'd0;         // X0
+      end else begin
          if (reg_we) begin
             regs[reg_wa] <= reg_wdata;	    
          end
@@ -288,7 +316,7 @@ module wb_oisc #(parameter CLK_DIV = 2)(
    end
 
    // RISC-V IF decoder
-   wire [8:0] 	       decoder_micro_pc;
+   wire [7:0] 	       decoder_micro_pc;
    wire [2:0]          decoder_funct3;
    wire                decoder_funct7;
    wire                decoder_res;		// From decoder of decoder.v
@@ -323,9 +351,11 @@ module wb_oisc #(parameter CLK_DIV = 2)(
 		   .decoder_renable	((state[FETCH_INSTR_BIT] && wb_ack_i)),
                    .decoder_rtype (decoder_rtype));
 
-   always @(posedge clk) begin
-      state <= state;
-      if (rst_n) begin
+   always @(posedge clk or negedge rst_n) begin
+      if (!rst_n) begin
+         state <= FETCH_RVPC;
+         micro_state <= MICRO_FETCH;
+      end else begin
          if (state[EXECUTE_BIT]) begin
             if (micro_done) begin
                if (decoder_load | (decoder_store & ~wb_ack_i)) begin
@@ -346,99 +376,6 @@ module wb_oisc #(parameter CLK_DIV = 2)(
          end
       end
    end // always @ (posedge clk)
-
-   // DEBUG LOGIC
-   `ifdef SIMULATION
-   reg [8*16-1:0] state_str = "abc";
-   reg [31:0] PC;
-   reg [31:0] X0;
-   reg [31:0] X1;
-   reg [31:0] X2;
-   reg [31:0] X3;
-   reg [31:0] X4;
-   reg [31:0] X5;
-   reg [31:0] X6;
-   reg [31:0] X7;
-   reg [31:0] X8;
-   reg [31:0] X9;
-   reg [31:0] X10;
-   reg [31:0] X11;
-   reg [31:0] X12;
-   reg [31:0] X13;
-   reg [31:0] X14;
-   reg [31:0] X15;
-   reg [31:0] X16;
-   reg [31:0] X17;
-   reg [31:0] X18;
-   reg [31:0] X19;
-   reg [31:0] X20;
-   reg [31:0] X21;
-   reg [31:0] X22;
-   reg [31:0] X23;
-   reg [31:0] X24;
-   reg [31:0] X25;
-   reg [31:0] X26;
-   reg [31:0] X27;
-   reg [31:0] X28;
-   reg [31:0] X29;
-   reg [31:0] X30;
-   reg [31:0] X31;
-
-   assign PC = regs[1];
-   assign X0 = regs[32];
-   assign X1 = regs[33];
-   assign X2 = regs[34];
-   assign X3 = regs[35];
-   assign X4 = regs[36];
-   assign X5 = regs[37];
-   assign X6 = regs[38];
-   assign X7 = regs[39];
-   assign X8 = regs[40];
-   assign X9 = regs[41];
-   assign X10 = regs[42];
-   assign X11 = regs[43];
-   assign X12 = regs[44];
-   assign X13 = regs[45];
-   assign X14 = regs[46];
-   assign X15 = regs[47];
-   assign X16 = regs[48];
-   assign X17 = regs[49];
-   assign X18 = regs[50];
-   assign X19 = regs[51];
-   assign X20 = regs[52];
-   assign X21 = regs[53];
-   assign X22 = regs[54];
-   assign X23 = regs[55];
-   assign X24 = regs[56];
-   assign X25 = regs[57];
-   assign X26 = regs[58];
-   assign X27 = regs[59];
-   assign X28 = regs[60];
-   assign X29 = regs[61];
-   assign X30 = regs[62];
-   assign X31 = regs[63];
-
-   always @(*) begin
-      if (state[FETCH_RVPC_BIT]) state_str = "FETCH_RVPC";
-      else if (state[FETCH_INSTR_BIT]) state_str = "FETCH_INSTR";
-      //else if (state[DECODE_INSTR_BIT]) state_str = "DECODE_INSTR";
-      else if (state[PLACE_SRC2_BIT]) state_str = "PLACE_SRC2";
-      else if (state[PLACE_SRC1_BIT]) state_str = "PLACE_SRC1";
-      else if (state[PLACE_IMM_BIT]) state_str = "PLACE_IMM";
-      else if (state[EXECUTE_BIT]) state_str = "EXECUTE";
-      else if (state[MEMORY_BIT]) state_str = "MEMORY";
-      //else if (state[WRITE_BACK_BIT]) state_str = "WRITE_BACK";
-      else state_str = "???";
-   end // always @ (*)
-
-   reg [8*16-1:0] micro_state_str = "abc";
-   always @(*) begin
-      if (micro_state[MICRO_FETCH_BIT]) micro_state_str = "FETCH";
-      else if (micro_state[MICRO_EXECUTE_BIT]) micro_state_str = "EXECUTE";
-      else if (micro_state[MICRO_WRITEBACK_BIT]) micro_state_str = "WRITEBACK";
-      else micro_state_str = "???";
-   end // always @ (*)
-   `endif
    
 endmodule
 `endif

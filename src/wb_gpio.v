@@ -44,7 +44,8 @@ module wb_gpio(
                dat_o <= {31'b0, data_i[adr_i[1:0]]};
             end
             ack_o <= 1'b1;
-         end
+         end else
+            ack_o <= 1'b0;
       end
    end
 
