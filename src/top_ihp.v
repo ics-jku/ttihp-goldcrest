@@ -201,7 +201,7 @@ module top_ihp(
                );
 
    wb_bram wb_bram(.clk(clk),
-              .adr_i(wb_adr[9:0]),
+              .adr_i(wb_adr[7:0]),
               .dat_i(wb_dato),
               .dat_o(wb_dati_bram),
               .we_i(wb_we),
