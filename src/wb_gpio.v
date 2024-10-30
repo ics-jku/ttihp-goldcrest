@@ -26,10 +26,8 @@ module wb_gpio(
       if (!rst_n) begin
          ack_o <= 1'b0;
          data_o <= 4'b1010; // just to see if anything works, standard output 1010 on reset
-      end else begin
-         ack_o <= 1'b0;
          dat_o <= 32'd0;
-         
+      end else begin     
          if (cyc_i & stb_i & ~ack_o) begin
             if (we_i) begin
                data_o[adr_i[1:0]] <= dat_i[0];

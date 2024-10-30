@@ -34,6 +34,7 @@ module wb_imem(
          state <= S_IDLE;
          bits_left <= 0;
          spi_cs_o <= 1;
+         cmd <= 0;
       end else begin
          case (state)
            S_IDLE: begin
