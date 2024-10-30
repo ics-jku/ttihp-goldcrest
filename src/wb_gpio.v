@@ -25,6 +25,7 @@ module wb_gpio(
    always @(posedge clk or negedge rst_n) begin
       if (!rst_n) begin
          ack_o <= 1'b0;
+         data_o <= 4'b1010; // just to see if anything works, standard output 1010 on reset
       end else begin
          ack_o <= 1'b0;
          dat_o <= 32'd0;
