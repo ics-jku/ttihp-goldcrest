@@ -1,10 +1,12 @@
+`ifndef __WB_SPI__
+`define __WB_SPI__
 `define SPI_1_BIT 27
 `define SPI_2_BIT 26
 `define SPI_3_BIT 25
 
 module wb_spi(
                input wire         clk,
-               input wire         rst,
+               input wire         rst_n,
                // Wishbone signals
                input wire [31:0]  adr_i, // ADR_I() address
                input wire [31:0]  dat_i, // DAT_I() data in
@@ -33,15 +35,15 @@ module wb_spi(
    // generate slower 10Mhz SPI clock to make led matrix work
    reg [1:0] spi_clk_cnt;
    wire      spi_clk = spi_clk_cnt[1];
-   always @(negedge clk) 
-      if (rst) begin
+   always @(negedge clk or negedge rst_n) 
+      if (!rst_n) begin
          spi_clk_cnt <= 0;   
       end else begin
          spi_clk_cnt <= spi_clk_cnt + 2'd1;
       end
 
-   always @(posedge clk) begin
-      if (rst) begin
+   always @(posedge clk or negedge rst_n) begin
+      if (!rst_n) begin
          state <= S_IDLE;
          bits_left <= 0;
          spi_cs_o_1 <= 1;
@@ -92,3 +94,4 @@ module wb_spi(
    assign spi_data_o = (state == S_SENDING) ? cmd[31] : 1'b0;
 
 endmodule
+`endif

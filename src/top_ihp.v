@@ -1,3 +1,12 @@
+`ifndef __TOP_IHP__
+`define __TOP_IHP__
+`include "wb_emem.v"
+`include "wb_imem.v"
+`include "wb_gpio.v"
+`include "wb_spi.v"
+`include "wb_uart.v"
+`include "wb_oisc.v"
+
 `define SPI_RAM_BIT 31
 `define SPI_ROM_BIT 30
 `define UART_BIT 29
@@ -8,7 +17,7 @@
 
 module top_ihp(
               input wire        clk,
-              input wire        reset,
+              input wire        rst_n,
               // UART
               output wire       tx,
               input wire        rx,
@@ -67,7 +76,7 @@ module top_ihp(
    // 0000001000000000_0000000000000000 SPI3    (0x02000000)
 
    wb_oisc oisc(.clk(clk),
-		.reset(reset),
+		.rst_n(rst_n),
                 .wb_ack_i(wb_ack),
                 .wb_dat_i(wb_dati),
                 .wb_cyc_o(wb_cyc),
@@ -107,7 +116,7 @@ module top_ihp(
                          wb_ack_spi ? wb_dati_spi : 0;
 
    wb_uart wb_uart(.clk(clk),
-                   .rst(reset),
+                   .rst_n(rst_n),
                    .adr_i(wb_adr[15:0]),
                    .dat_i(wb_dato),
                    .we_i(wb_we),
@@ -120,7 +129,7 @@ module top_ihp(
                    .rx(rx));
 
    wb_imem wb_imem(.clk(clk),
-                   .rst(reset),
+                   .rst_n(rst_n),
                    .adr_i(wb_adr),
                    .dat_i(wb_dato),
                    .dat_o(wb_dati_rom),
@@ -138,7 +147,7 @@ module top_ihp(
 
 
    wb_emem wb_emem(.clk(clk),
-                   .rst(reset),
+                   .rst_n(rst_n),
                    .adr_i(wb_adr),
                    .dat_i(wb_dato),
                    .dat_o(wb_dati_ram),
@@ -155,7 +164,7 @@ module top_ihp(
                    );
 
    wb_spi wb_spi(.clk(clk),
-                   .rst(reset),
+                   .rst_n(rst_n),
                    .adr_i(wb_adr),
                    .dat_i(wb_dato),
                    .dat_o(wb_dati_spi),
@@ -175,7 +184,7 @@ module top_ihp(
 
    wb_gpio wb_gpio(
                .clk(clk),
-               .rst(reset),
+               .rst_n(rst_n),
                .adr_i(wb_adr), // ADR_I() address
                .dat_i(wb_dato), // DAT_I() data in
                .dat_o(wb_dati_gpio), // DAT_O() data out
@@ -189,3 +198,4 @@ module top_ihp(
                );
 
 endmodule
+`endif

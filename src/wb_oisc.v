@@ -1,3 +1,7 @@
+`ifndef __WB_OISC__
+`define __WB_OISC__
+`include "decoder.v"
+
 `define TMP0 5'd0
 `define RVPC 5'd1
 `define SRC1 5'd2
@@ -19,7 +23,7 @@
 
 module wb_oisc #(parameter CLK_DIV = 2)(
 	                                input wire         clk,
-	                                input wire         reset,
+	                                input wire         rst_n,
 
                                         input wire         wb_ack_i,
                                         input wire [31:0]  wb_dat_i,
@@ -60,9 +64,27 @@ module wb_oisc #(parameter CLK_DIV = 2)(
 
    // ------------------------------------------------------------
    /** microcode ROM */
-   reg [15:0]                                              rom [0:255];
+   /* verilator lint_off LITENDIAN */
+   localparam [0:(256*16)-1] rom = {
+      16'h30FF,16'hD101,16'h0001,16'hA301,16'h2802,16'h3301,16'h0004,16'h2003,16'h0001,16'h0005,16'h2007,16'h0001,16'h8004,16'h3301,16'h0001,16'h04FF,
+      16'h0001,16'hD101,16'h00F0,16'hC901,16'h0201,16'h2001,16'h0001,16'h9006,16'h0001,16'h0401,16'h4001,16'h0001,16'h0004,16'hC401,16'h0401,16'h4001,
+      16'h0001,16'h2006,16'h0001,16'h0901,16'h8001,16'hB901,16'h9901,16'h4401,16'h0001,16'h0003,16'hA401,16'h2003,16'h4401,16'h0001,16'h32FF,16'hD101,
+      16'hC0FD,16'h2301,16'h3301,16'h3201,16'h8004,16'h2201,16'h2301,16'h3301,16'h0001,16'h03FF,16'h0001,16'hD101,16'hC5F2,16'h0801,16'h8001,16'h0001,
+      16'h0201,16'h2001,16'h0001,16'hC301,16'h8002,16'h0001,16'h2004,16'h0001,16'h0301,16'h3001,16'h0001,16'h3304,16'hB501,16'h5501,16'h03FF,16'h0001,
+      16'hD101,16'hC5F0,16'h0801,16'h8001,16'h0001,16'h0201,16'h2001,16'h0001,16'hC301,16'h8002,16'h0001,16'h0005,16'hC301,16'h2003,16'h0001,16'h0301,
+      16'h3001,16'h0001,16'h3304,16'hB501,16'h5501,16'h03FF,16'h0001,16'hD101,16'hC5EF,16'h0801,16'h8001,16'h0001,16'h0201,16'h2001,16'h0001,16'hC301,
+      16'h8002,16'h0001,16'h0005,16'h8004,16'h0001,16'h2004,16'h0001,16'h0301,16'h3001,16'h0001,16'h3304,16'hB501,16'h5501,16'h01FF,16'h8001,16'h0001,
+      16'hD1FF,16'h2402,16'h3303,16'h2302,16'h3303,16'h2305,16'h4003,16'h3301,16'h0001,16'hD1FF,16'h01FF,16'h8001,16'h0001,16'h2404,16'h3305,16'h2302,
+      16'h3303,16'h2305,16'h4003,16'h3301,16'h0001,16'hD1FF,16'h51FF,16'h8501,16'h5501,16'h3404,16'h0002,16'h4202,16'h0301,16'h2001,16'h3301,16'h0001,
+      16'h01FF,16'h8001,16'h0001,16'hD1FF,16'h3402,16'h0002,16'h4202,16'h0301,16'h2001,16'h3301,16'h0001,16'h02FF,16'h2201,16'h3101,16'h1101,16'h1001,
+      16'h0001,16'hD101,16'h8301,16'h6801,16'h8801,16'hC601,16'h8002,16'h0001,16'hC0FD,16'h5801,16'h8501,16'h5501,16'h8601,16'hC001,16'hB001,16'h3301,
+      16'h3801,16'h2301,16'h6601,16'h5501,16'h3301,16'h0001,16'hD4FF,16'h3401,16'h0101,16'h1301,16'h8001,16'h4401,16'h3301,16'h0001,16'h02FF,16'hD101,
+      16'h8001,16'h0001,16'h04FF,16'hD101,16'h8001,16'h0001,16'h0401,16'h1001,16'h4401,16'h0001,16'h82FF,16'hD101,16'h02FF,16'hD101,16'h8001,16'h0001,
+      16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,
+      16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000
+      };
+   /* verilator lint_on LITENDIAN */
 
-   initial $readmemh("microcode.hex", rom);
 
    // ------------------------------------------------------------
    /** register bank */
@@ -150,40 +172,36 @@ module wb_oisc #(parameter CLK_DIV = 2)(
    
    reg [3:0]                  micro_res_addr;
    
-   always @ (posedge clk) begin
-      micro_res_addr <= 0;
-      
-      if (!reset) begin
-	 if (state[PLACE_SRC2_BIT]) begin
-	    micro_pc <= decoder_micro_pc[7:0];
-	 end else if (state[EXECUTE_BIT] & micro_state[MICRO_WRITEBACK_BIT] & ~micro_done) begin
-	    if ($signed(op_b) <= $signed(op_a)) begin
-               if (op_jump[7]) begin
-                  micro_pc <= micro_pc - op_jump_neg;
-               end else begin
-                  micro_pc <= micro_pc + op_jump;
-               end
-	    end else begin
-	       micro_pc <= micro_pc + 1;
-	    end
-	 end else if (micro_done) begin
-	    micro_pc <= 0;
+   always @ (posedge clk or negedge rst_n) begin
+      if (!rst_n) begin
+         micro_res_addr <= 0;
+      end else begin
+         if (state[PLACE_SRC2_BIT]) begin
+            micro_pc <= decoder_micro_pc[7:0];
+         end else if (state[EXECUTE_BIT] & micro_state[MICRO_WRITEBACK_BIT] & ~micro_done) begin
+            if ($signed(op_b) <= $signed(op_a)) begin
+                     if (op_jump[7]) begin
+                        micro_pc <= micro_pc - op_jump_neg;
+                     end else begin
+                        micro_pc <= micro_pc + op_jump;
+                     end
+            end else begin
+               micro_pc <= micro_pc + 1;
+            end
+         end else if (micro_done) begin
+            micro_pc <= 0;
          end else begin
             micro_pc <= micro_pc;
          end
 
-	 micro_res_addr <= reg_rb[3:0];
+         micro_res_addr <= reg_rb[3:0];
       end
-   end // always @ (posedge clk)
+   end
 
    // process for reading from the microcode ROM
-   always @(posedge clk) begin
+   always @(posedge clk or negedge rst_n) begin
       
-      if (!reset) begin
-         if (state[EXECUTE_BIT] & micro_state[MICRO_FETCH_BIT] | micro_done) begin
-            micro_op <= rom[micro_pc];
-         end
-      end else begin
+      if (!rst_n) begin
          micro_op <= 0;
          for (i=0; i < 64; i=i+1) begin
             regs[i] <= 0;
@@ -199,23 +217,33 @@ module wb_oisc #(parameter CLK_DIV = 2)(
          regs[11] <= 32'd31; // WORD value  (31)
          regs[12] <= -32'd1; // INC value   (-1)
          regs[13] <= -32'd4; // NEXT value (-4)
+      end else begin
+         if (state[EXECUTE_BIT] & micro_state[MICRO_FETCH_BIT] | micro_done) begin
+            micro_op <= rom[micro_pc*16+:16];
+         end
       end
    end
    
    // process for reading from regbank
-   always @(posedge clk) begin
-      if (!reset && !(state[FETCH_INSTR_BIT] && !wb_ack_i)) begin
-	 op_a <= regs[reg_ra];
-	 op_b <= regs[reg_rb];
+   always @(posedge clk or negedge rst_n) begin
+      if (!rst_n) begin
+         op_a <= 0;
+         op_b <= 0;
+      end else begin
+         if (!(state[FETCH_INSTR_BIT] && !wb_ack_i)) begin
+            op_a <= regs[reg_ra];
+            op_b <= regs[reg_rb];
+         end
       end
+      
    end
 
    // process for writing to the regbank
-   always @(posedge clk) begin
-      if (!reset) begin
-	 if (reg_we) begin
+   always @(posedge clk or negedge rst_n) begin
+      if (rst_n) begin
+         if (reg_we) begin
             regs[reg_wa] <= reg_wdata;	    
-	 end
+         end
       end
    end
 
@@ -237,11 +265,11 @@ module wb_oisc #(parameter CLK_DIV = 2)(
                      wb_write_transaction | wb_read_transaction ? res[31:0] : 0;
    assign wb_we_o = state[EXECUTE_BIT] & micro_done & decoder_store;
    
-   always @(posedge clk) begin
-      if (reset) begin
-	 wb_dat_o <= 0;
+   always @(posedge clk or negedge rst_n) begin
+      if (rst_n) begin
+	      wb_dat_o <= 0;
       end else if (state[PLACE_SRC2_BIT] & decoder_store) begin
-	 wb_dat_o <= reg_wdata;
+	      wb_dat_o <= reg_wdata;
       end
    end
 
@@ -276,14 +304,14 @@ module wb_oisc #(parameter CLK_DIV = 2)(
 		   .decoder_sign_extend (decoder_sign_extend),
 		   // Inputs
 		   .clk			(clk),
-		   .reset		(reset),
+		   .rst_n		(rst_n),
 		   .decoder_inst	(wb_dat_i),
 		   .decoder_renable	((state[FETCH_INSTR_BIT] && wb_ack_i)),
                    .decoder_rtype (decoder_rtype));
 
    always @(posedge clk) begin
       state <= state;
-      if (!reset) begin
+      if (rst_n) begin
          if (state[EXECUTE_BIT]) begin
             if (micro_done) begin
                if (decoder_load | (decoder_store & ~wb_ack_i)) begin
@@ -399,3 +427,4 @@ module wb_oisc #(parameter CLK_DIV = 2)(
    `endif
    
 endmodule
+`endif

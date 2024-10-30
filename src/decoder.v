@@ -1,6 +1,9 @@
+`ifndef __DECODER__
+`define __DECODER__
+
 module decoder (
     input  wire        clk,
-    input  wire        reset,
+    input  wire        rst_n,
     input  wire [31:0] decoder_inst,
     input  wire        decoder_renable,
     output wire        decoder_res,
@@ -20,7 +23,19 @@ module decoder (
 
 
    reg [31:0]                     instruction = 0;
-   reg [15:0]                     rom [0:127];
+   // the microcode for the decoder
+   /* verilator lint_off LITENDIAN */
+   localparam [0:(128*16)-1] rom = {
+      16'h180E,16'h0000,16'h1000,16'h7006,16'h240E,16'h9012,16'hD000,16'h7000,16'h180E,16'h0000,16'hB0A7,16'h0000,16'h240E,16'h0000,16'hD0A7,16'h0000,
+      16'h180E,16'h0000,16'h10DA,16'h0000,16'h240E,16'h0000,16'hD0DA,16'h0000,16'h0000,16'h0000,16'h10D1,16'h0000,16'h0000,16'h0000,16'hD0D1,16'h0000,
+      16'h180E,16'h0000,16'h1063,16'h0000,16'h0000,16'h0000,16'hD063,16'h0000,16'h180E,16'h0000,16'hB0B7,16'h0000,16'h0000,16'h0000,16'hD0B7,16'h0000,
+      16'h0000,16'h0000,16'h107B,16'h0000,16'h0000,16'h0000,16'hD07B,16'h0000,16'h0000,16'h0000,16'h1092,16'h0000,16'h0000,16'h0000,16'hD092,16'h0000,
+      16'h0000,16'h0000,16'h0000,16'h0000,16'h4035,16'h101A,16'hD004,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h4040,16'h0000,16'h0000,16'h0000,
+      16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,
+      16'h0000,16'h0000,16'h0000,16'h0000,16'h4052,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'hB0B2,16'h0000,16'h405E,16'h0000,16'hD0B2,16'h0000,
+      16'h0000,16'h0000,16'h0000,16'h0000,16'h404B,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h0000,16'h4057,16'h0000,16'h0000,16'h0000
+   };
+   /* verilator lint_on LITENDIAN */
    reg [15:0]                     decoded = 16'b0;
 
    localparam opcode_R =      5'b01100; // opshort = 3'b110                
@@ -56,14 +71,18 @@ module decoder (
    wire [6:0]                     code = {funct7, funct3, opshort};
    wire [2:0]                     itype = decoded[15:13];
    //wire [4:0]                     opcode = instruction[6:2];
-
-   initial $readmemh("decoder.hex", rom);
    
-   always @(posedge clk) begin
-      if (decoder_renable && !reset) begin
-	 instruction <= decoder_inst;
-         decoded <= rom[code];
+   always @(posedge clk or negedge rst_n) begin
+      if (!rst_n) begin
+         instruction <= 0;
+         decoded <= 0;
+      end else begin
+         if (decoder_renable) begin
+            instruction <= decoder_inst;
+            decoded <= rom[code*16+:16];
+         end
       end
+      
    end
 
    //wire is_jalr = instruction[6:2] == 5'b11001;
@@ -91,4 +110,4 @@ module decoder (
 			 decoder_funct3 == 3'b010 ? 4'b1111 : 0 ; // W
    assign decoder_sign_extend = itype[2];
 endmodule
-
+`endif

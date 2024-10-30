@@ -1,3 +1,6 @@
+`ifndef __UART_RX__
+`define __UART_RX__
+
 //////////////////////////////////////////////////////////////////////////////////
 // Basic UART receiver with configurable baud rate and word size
 //////////////////////////////////////////////////////////////////////////////////
@@ -7,7 +10,7 @@ module uart_rx #(
     parameter BIT = 8
 ) (
     input                clk,
-    input                rst,
+    input                rst_n,
     output reg [BIT-1:0] rx_data,
     input                rx_data_start,
     output reg           rx_data_ready,
@@ -31,8 +34,8 @@ module uart_rx #(
   reg           rx_reg;
 
   // FSM: next state latch
-  always @(posedge clk) begin
-    if (rst) state <= S_IDLE;
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) state <= S_IDLE;
     else state <= next_state;
   end
 
@@ -59,15 +62,15 @@ module uart_rx #(
   end
 
   // RX Ready output
-  always @(posedge clk) begin
-    if (rst) rx_data_ready <= 1'b0;
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) rx_data_ready <= 1'b0;
     else if (state == S_STOP && cycle_cnt >= (CYCLE / 2)) rx_data_ready <= 1'b1;
     else if (state == S_IDLE) rx_data_ready <= 1'b0;
   end
 
   // compute bit counter
-  always @(posedge clk or posedge rst) begin
-    if (rst) bit_cnt <= 4'h0;
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) bit_cnt <= 4'h0;
     else if (state == S_RX)
       if (cycle_cnt == CYCLE - 1) bit_cnt <= bit_cnt + 4'h1;
       else bit_cnt <= bit_cnt;
@@ -75,17 +78,18 @@ module uart_rx #(
   end
 
   // compute cycle counter
-  always @(posedge clk) begin
-    if (rst) cycle_cnt <= 32'h00;
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) cycle_cnt <= 32'h00;
     else if ((state == S_RX && cycle_cnt == CYCLE - 1) || next_state != state) cycle_cnt <= 32'h00;
     else cycle_cnt <= cycle_cnt + 32'h1;
   end
 
   // RX bit
-  always @(posedge clk) begin
-    if (rst) rx_data <= 8'b0;
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) rx_data <= 8'b0;
     else if (state == S_RX && cycle_cnt == (CYCLE / 2))
       rx_data[bit_cnt[2:0]] <= rx_pin;
   end
 
 endmodule
+`endif

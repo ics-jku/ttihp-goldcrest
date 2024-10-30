@@ -1,6 +1,11 @@
+`ifndef __WB_UART__
+`define __WB_UART__
+`include "uart_tx.v"
+`include "uart_rx.v"
+
 module wb_uart(
                input wire         clk,
-               input wire         rst,
+               input wire         rst_n,
                input wire [15:0]  adr_i, // ADR_I() address
                input wire [31:0]  dat_i, // DAT_I() data in
                input wire         we_i, // WE_I write enable input
@@ -32,8 +37,8 @@ module wb_uart(
    
 
    // used to calculate the tx ack
-   always @(posedge clk) begin
-      if (rst) begin
+   always @(posedge clk or negedge rst_n) begin
+      if (!rst_n) begin
          state <= S_IDLE;
       end else begin
          ack_o <= 0;
@@ -58,17 +63,18 @@ module wb_uart(
    end // always @ (posedge clk)
 
    uart_tx uart_tx(.clk(clk),
-		   .rst(rst),
+		   .rst_n(rst_n),
 		   .tx_data(dat_i[7:0]),
 		   .tx_data_valid(tx_start),
 		   .tx_data_ready(tx_ready),
 		   .tx_pin(tx));
 
    uart_rx uart_rx(.clk(clk),
-		   .rst(rst),
+		   .rst_n(rst_n),
 		   .rx_data(dat_tmp),
 		   .rx_data_start(rx_start),
 		   .rx_data_ready(rx_ready),
 		   .rx_pin(rx));
 
 endmodule
+`endif

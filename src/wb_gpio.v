@@ -1,6 +1,9 @@
+`ifndef __WB_GPIO__
+`define __WB_GPIO__
+
 module wb_gpio(
                input wire         clk,
-               input wire         rst,
+               input wire         rst_n,
                input wire [31:0]  adr_i, // ADR_I() address
                input wire [31:0]  dat_i, // DAT_I() data in
                output reg [31:0] dat_o, // DAT_O() data out
@@ -19,8 +22,8 @@ module wb_gpio(
    assign gpio_o = data_o;
    assign data_i = gpio_i;
 
-   always @(posedge clk) begin
-      if (rst) begin
+   always @(posedge clk or negedge rst_n) begin
+      if (!rst_n) begin
          ack_o <= 1'b0;
       end else begin
          ack_o <= 1'b0;
@@ -38,3 +41,4 @@ module wb_gpio(
    end
 
 endmodule
+`endif

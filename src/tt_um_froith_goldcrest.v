@@ -4,6 +4,7 @@
  */
 
 `default_nettype none
+`include "top_ihp.v"
 
 module tt_um_froith_goldcrest (
     input  wire [7:0] ui_in,    // Dedicated inputs
@@ -13,12 +14,12 @@ module tt_um_froith_goldcrest (
     output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
     input  wire       ena,      // always 1 when the design is powered, so you can ignore it
     input  wire       clk,      // clock
-    input  wire       rst_n     // reset_n - low to reset
+    input  wire       rst_n     // rst_n - low to reset
 );
 
   top_ihp top_ihp(
               .clk(clk),
-              .reset(~rst_n),
+              .rst_n(rst_n),
               // UART
               .tx(uo_out[0]),
               .rx(ui_in[0]),

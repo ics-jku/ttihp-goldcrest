@@ -1,6 +1,9 @@
+`ifndef __WB_EMEM__
+`define __WB_EMEM__
+
 module wb_emem(
                input wire         clk,
-               input wire         rst,
+               input wire         rst_n,
                // Wishbone signals
                input wire [31:0]  adr_i, // ADR_I() address
                input wire [31:0]  dat_i, // DAT_I() data in
@@ -55,8 +58,8 @@ module wb_emem(
 	// ---
 
 	// State register
-	always @(negedge clk or posedge rst)
-		if (rst)
+	always @(negedge clk or negedge rst_n)
+		if (!rst_n)
 			state <= S_STARTUP;
 		else
 			state <= state_next;
@@ -115,8 +118,8 @@ module wb_emem(
 	// Shift Register
 	// --------------
 
-	always @(negedge clk or posedge rst)
-		if (rst)
+	always @(negedge clk or negedge rst_n)
+		if (!rst_n)
 			cmd <= 64'h6699000000000000;
 		else begin
          if (state == S_STARTUP) 
@@ -133,14 +136,7 @@ module wb_emem(
             end
          end else if (state[2] == 1)
             cmd <= { cmd[62:0], spi_data_i };
-      end
-   
-   //always @(posedge clk)
-   //   if (rst)
-	//		shift_register <= 72'hAB0000000000000000;
-	//	else if ((state == S_SEND_DATA) && (write_operation == 1))
-   //      shift_register <= { shift_register[70:0], spi_data_i };
-		
+      end		
 
 
 	// Counters
@@ -203,3 +199,4 @@ module wb_emem(
 
 
 endmodule
+`endif

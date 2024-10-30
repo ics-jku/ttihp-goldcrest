@@ -1,3 +1,6 @@
+`ifndef __UART_TX__
+`define __UART_TX__
+
 //////////////////////////////////////////////////////////////////////////////////
 // Basic UART receiver with configurable baud rate and word size
 //////////////////////////////////////////////////////////////////////////////////
@@ -7,7 +10,7 @@ module uart_tx #(
     parameter BIT       = 8
 ) (
     input                clk,
-    input                rst,
+    input                rst_n,
     input      [BIT-1:0] tx_data,
     input                tx_data_valid,
     output reg           tx_data_ready,
@@ -33,8 +36,8 @@ module uart_tx #(
   assign tx_pin = tx_reg;
 
   // FSM: next state latch
-  always @(posedge clk) begin
-    if (rst) state <= S_IDLE;
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) state <= S_IDLE;
     else state <= next_state;
   end
 
@@ -58,8 +61,8 @@ module uart_tx #(
   end
 
   // TX Ready output
-  always @(posedge clk) begin
-    if (rst) tx_data_ready <= 1'b0;
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) tx_data_ready <= 1'b0;
     else if (state == S_IDLE)
       if (tx_data_valid) tx_data_ready <= 1'b0;
       else tx_data_ready <= 1'b1;
@@ -67,14 +70,14 @@ module uart_tx #(
   end
 
   // latch TX data
-  always @(posedge clk) begin
-    if (rst) tx_data_latch <= 0;
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) tx_data_latch <= 0;
     else if (state == S_IDLE && tx_data_valid) tx_data_latch <= tx_data;
   end
 
   // compute bit counter
-  always @(posedge clk or posedge rst) begin
-    if (rst) bit_cnt <= 4'h0;
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) bit_cnt <= 4'h0;
     else if (state == S_TX)
       if (cycle_cnt == CYCLE - 1) bit_cnt <= bit_cnt + 4'h1;
       else bit_cnt <= bit_cnt;
@@ -82,15 +85,15 @@ module uart_tx #(
   end
 
   // compute cycle counter
-  always @(posedge clk) begin
-    if (rst) cycle_cnt <= 32'h00;
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) cycle_cnt <= 32'h00;
     else if ((state == S_TX && cycle_cnt == CYCLE - 1) || next_state != state) cycle_cnt <= 32'h00;
     else cycle_cnt <= cycle_cnt + 32'h1;
   end
 
   // TX bit
-  always @(posedge clk) begin
-    if (rst) tx_reg <= 1'b1;
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) tx_reg <= 1'b1;
     else
       case (state)
         S_IDLE, S_STOP: tx_reg <= 1'b1;
@@ -101,3 +104,4 @@ module uart_tx #(
   end
 
 endmodule
+`endif

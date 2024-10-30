@@ -1,6 +1,9 @@
+`ifndef __WB_IMEM__
+`define __WB_IMEM__
+
 module wb_imem(
                input wire         clk,
-               input wire         rst,
+               input wire         rst_n,
                // Wishbone signals
                input wire [31:0]  adr_i, // ADR_I() address
                input wire [31:0]  dat_i, // DAT_I() data in
@@ -26,8 +29,8 @@ module wb_imem(
    reg [5:0]                      bits_left;
    reg [31:0]                     cmd;
 
-   always @(negedge clk) begin
-      if (rst) begin
+   always @(negedge clk or negedge rst_n) begin
+      if (!rst_n) begin
          state <= S_IDLE;
          bits_left <= 0;
          spi_cs_o <= 1;
@@ -70,3 +73,4 @@ module wb_imem(
    assign spi_data_o = (state == S_SENDING) ? cmd[31] : 1'b0;
 
 endmodule
+`endif
