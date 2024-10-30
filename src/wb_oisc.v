@@ -266,7 +266,7 @@ module wb_oisc #(parameter CLK_DIV = 2)(
    assign wb_we_o = state[EXECUTE_BIT] & micro_done & decoder_store;
    
    always @(posedge clk or negedge rst_n) begin
-      if (rst_n) begin
+      if (!rst_n) begin
 	      wb_dat_o <= 0;
       end else if (state[PLACE_SRC2_BIT] & decoder_store) begin
 	      wb_dat_o <= reg_wdata;

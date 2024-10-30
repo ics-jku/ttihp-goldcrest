@@ -50,6 +50,7 @@ module wb_spi(
          spi_cs_o_2 <= 1;
          spi_cs_o_3 <= 1;
          ack_o <= 0;
+         cmd <= 0;
       end else begin
          ack_o <= 0;
          case (state)
