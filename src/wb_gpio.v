@@ -16,8 +16,17 @@ module wb_gpio(
                output wire [3:0]  gpio_o
                );
 
+   /* verilator lint_off UNUSEDSIGNAL */
+   wire [31:0] dummy1;
+   assign dummy1 = adr_i;
+   wire [31:0] dummy2;
+   assign dummy2 = dat_i[31:0];
+   wire [3:0] dummy3;
+   assign dummy3 = sel_i;
+   /* verilator lint_on UNUSEDSIGNAL */
+
    reg    [3:0]                       data_o;
-   reg    [3:0]                       data_i;
+   wire   [3:0]                       data_i;
    
    assign gpio_o = data_o;
    assign data_i = gpio_i;
