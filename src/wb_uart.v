@@ -18,7 +18,14 @@ module wb_uart(
                input wire         rx
                );
 
-   
+   /* verilator lint_off UNUSEDSIGNAL */
+   wire [15:0] dummy1;
+   assign dummy1 = adr_i;
+   wire [31:8] dummy2;
+   assign dummy2 = dat_i[31:8];
+   wire [3:0] dummy3;
+   assign dummy3 = sel_i;
+   /* verilator lint_on UNUSEDSIGNAL */
 
    wire [7:0] dat_tmp;
    assign dat_o = {24'b0, dat_tmp};
@@ -27,7 +34,6 @@ module wb_uart(
    wire                           rx_start = stb_i & cyc_i & ~we_i & sel_i[0];
    wire                           tx_ready;
    wire                           rx_ready;
-   reg                            working;
 
    localparam                     S_IDLE = 0;
    localparam                     S_WORKING_TX = 1;
