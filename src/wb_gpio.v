@@ -17,10 +17,10 @@ module wb_gpio(
                );
 
    /* verilator lint_off UNUSEDSIGNAL */
-   wire [31:0] dummy1;
-   assign dummy1 = adr_i;
-   wire [31:0] dummy2;
-   assign dummy2 = dat_i[31:0];
+  wire [31:2] dummy1;
+  assign dummy1 = adr_i[31:2];
+  wire [31:1] dummy2;
+  assign dummy2 = dat_i[31:1];
    wire [3:0] dummy3;
    assign dummy3 = sel_i;
    /* verilator lint_on UNUSEDSIGNAL */
