@@ -22,7 +22,7 @@ module decoder (
 );
 
 
-   reg [31:0]                     instruction = 0;
+   reg [31:0]                     instruction;
    // the microcode for the decoder
    /* verilator lint_off LITENDIAN */
    localparam [0:(128*16)-1] rom = {
@@ -39,14 +39,24 @@ module decoder (
    reg [15:0]                     decoded = 16'b0;
 
    localparam opcode_R =      5'b01100; // opshort = 3'b110                
+   /* verilator lint_off UNUSEDPARAM */
    localparam opcode_I =      5'b00100; // opshort = 3'b010                
    localparam opcode_I_load = 5'b00000; // opshort = 3'b000                
    localparam opcode_S =      5'b01000; // opshort = 3'b100    func7 = 0        
+   /* verilator lint_on UNUSEDPARAM */
    localparam opcode_B =      5'b11000; // opshort = 3'b100    func7 = 1    
    localparam opcode_J =      5'b11011; // opshort = 3'b101    func7 = 0
    localparam opcode_JALR =   5'b11001; // opshort = 3'b101    func7 = 1
    localparam opcode_LUI =    5'b01101; // opshort = 3'b111          
    localparam opcode_AUIPC =  5'b00101; // opshort = 3'b011          
+
+
+   /* verilator lint_off UNUSEDSIGNAL */
+   wire [6:0] dummy1;
+   assign dummy1 = instruction[6:0];
+   wire [9:8] dummy2;
+   assign dummy2 = decoded[9:8];
+   /* verilator lint_on UNUSEDSIGNAL */
 
 
    // opshort = 3'b001 is illegal, but does not happen with valid RISCV-32I Instructions
