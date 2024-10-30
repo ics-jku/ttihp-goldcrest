@@ -18,7 +18,7 @@
   "ABC_CLOCK_PERIOD_IN_PS": 20000,
 
   "//": "Increase this if you are getting 'Synthesized memory size exceeds maximum allowed bits' error:",
-  "SYNTH_MEMORY_MAX_BITS": 4096,
+  "SYNTH_MEMORY_MAX_BITS": 32768,
 
   "//": "Setting to 1 may help decrease design area utilization / speed up routing:",
   "ABC_AREA": 0,

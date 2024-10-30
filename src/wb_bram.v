@@ -61,7 +61,7 @@ module wb_bram #
    // (* RAM_STYLE="BLOCK" *)
    reg [DATA_WIDTH-1:0]           mem[0:(2**VALID_ADDR_WIDTH)-1];
 
-   wire [VALID_ADDR_WIDTH-1:0]    adr_i_valid = {adr_i >> (ADDR_WIDTH - VALID_ADDR_WIDTH)}[VALID_ADDR_WIDTH-1:0];
+   wire [VALID_ADDR_WIDTH-1:0]    adr_i_valid = adr_i[ADDR_WIDTH-1:(ADDR_WIDTH - VALID_ADDR_WIDTH)];
 
    assign dat_o = dat_o_reg;
    assign ack_o = ack_o_reg;
