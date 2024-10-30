@@ -200,7 +200,7 @@ module top_ihp(
                .gpio_o(gpio_o)
                );
 
-   wb_bram #(.ADDR_WIDTH(11)) wb_bram(.clk(clk),
+   wb_bram wb_bram(.clk(clk),
               .adr_i(wb_adr[10:0]),
               .dat_i(wb_dato),
               .dat_o(wb_dati_bram),
