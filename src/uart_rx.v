@@ -31,7 +31,6 @@ module uart_rx #(
   reg [    2:0] next_state;
   reg [   31:0] cycle_cnt;
   reg [    3:0] bit_cnt;
-  reg           rx_reg;
 
   // FSM: next state latch
   always @(posedge clk or negedge rst_n) begin
