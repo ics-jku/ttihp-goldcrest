@@ -6,13 +6,13 @@
 `include "wb_spi.v"
 `include "wb_uart.v"
 `include "wb_oisc.v"
-//`include "wb_bram.v"
+`include "wb_coproc.v"
 
 `define SPI_RAM_BIT 31
 `define SPI_ROM_BIT 30
 `define UART_BIT 29
 `define GPIO_BIT 28
-`define BRAM_BIT 27
+`define COPROC_BIT 27
 `define SPI_BIT 26
 
 module top_ihp(
@@ -90,33 +90,34 @@ module top_ihp(
    wire                         wb_cyc_uart = wb_cyc & wb_adr[`UART_BIT];
    wire                         wb_cyc_gpio = wb_cyc & wb_adr[`GPIO_BIT];
    wire                         wb_cyc_spi = wb_cyc & wb_adr[`SPI_BIT];
-//   wire                         wb_cyc_bram = wb_cyc & wb_adr[`BRAM_BIT];
+   wire                         wb_cyc_coproc = wb_cyc & wb_adr[`COPROC_BIT];
 
    wire                         wb_ack_gpio;
    wire                         wb_ack_uart;
    wire                         wb_ack_rom;
    wire                         wb_ack_ram;
    wire                         wb_ack_spi;
-//   wire                         wb_ack_bram;
+   wire                         wb_ack_coproc;
 
    wire [31:0]                  wb_dati_uart;
    wire [31:0]                  wb_dati_gpio;
    wire [31:0]                  wb_dati_rom;
    wire [31:0]                  wb_dati_ram;
    wire [31:0]                  wb_dati_spi;
-//   wire [31:0]                  wb_dati_bram;
+   wire [31:0]                  wb_dati_coproc;
 
    assign      wb_ack = wb_ack_uart |
                         wb_ack_gpio |
                         wb_ack_rom  |
                         wb_ack_ram  |
-                        wb_ack_spi; // | wb_ack_bram;
+                        wb_ack_spi  |
+                        wb_ack_coproc;
    assign      wb_dati = wb_ack_uart ? wb_dati_uart :
                          wb_ack_gpio ? wb_dati_gpio :
                          wb_ack_rom ? wb_dati_rom : 
                          wb_ack_ram ? wb_dati_ram : 
                          wb_ack_spi ? wb_dati_spi : 
-//                         wb_ack_bram ? wb_dati_bram : 
+                         wb_ack_coproc ? wb_dati_coproc :
                          0;
 
    wb_uart wb_uart(.clk(clk),
@@ -201,15 +202,15 @@ module top_ihp(
                .gpio_o(gpio_o)
                );
 
-//    wb_bram wb_bram(.clk(clk),
-//               .adr_i(wb_adr[7:0]),
-//               .dat_i(wb_dato),
-//               .dat_o(wb_dati_bram),
-//               .we_i(wb_we),
-//               .sel_i(wb_sel),
-//               .stb_i(wb_stb),
-//               .ack_o(wb_ack_bram),
-//               .cyc_i(wb_cyc_bram));
+   wb_coproc wb_coproc(.clk(clk),
+              .rst_n(rst_n),
+              .adr_i(wb_adr[4:0]),
+              .dat_i(wb_dato),
+              .dat_o(wb_dati_coproc),
+              .we_i(wb_we),
+              .stb_i(wb_stb),
+              .ack_o(wb_ack_coproc),
+              .cyc_i(wb_cyc_coproc));
 
 endmodule
 `endif
