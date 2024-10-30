@@ -95,8 +95,6 @@ module decoder (
 
    //wire is_jalr = instruction[6:2] == 5'b11001;
    assign decoder_pc = decoded[7:0];
-   // assign decoder_funct7 = ((opcode == 7'b0010011) && (funct3 == 3'b101)) || 
-   //                         ((opcode == 7'b0110011) && ((funct3 == 3'b000) || (funct3 == 3'b101))) ? instruction[30] : 0;
    assign decoder_funct7 = ((opcode == opcode_R) || (opcode == opcode_I && (decoder_inst[14:12] == 3'b001 || decoder_inst[14:12] == 3'b101))) ? instruction[30] : 1'b0;
    assign decoder_funct3 = instruction[14:12];
    assign decoder_rs2 = (itype == 3'd5 ? 5'b0 : instruction[24:20]);

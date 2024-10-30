@@ -38,7 +38,7 @@ module wb_oisc (
    wire dummy1;
    assign dummy1 = decoder_sign_extend;
    wire dummy2;
-   assign dummy1 = decoder_funct7;
+   assign dummy2 = decoder_funct7;
    wire dummy3;
    assign dummy3 = res[32];
    /* verilator lint_on UNUSEDSIGNAL */
@@ -153,8 +153,8 @@ module wb_oisc (
 
    // ----------------------------------------
    
-   //wire [31:0] wire_a = (reg_ra > 6'd15) && (reg_ra < 6'd33) ? 32'd0 : regs[reg_ra];
-   //wire [31:0] wire_b = (reg_rb > 6'd15) && (reg_rb < 6'd33) ? 32'd0 : regs[reg_rb];
+   wire [31:0] wire_a = (reg_ra > 6'd15) && (reg_ra < 6'd33) ? 32'd0 : regs[reg_ra];
+   wire [31:0] wire_b = (reg_rb > 6'd15) && (reg_rb < 6'd33) ? 32'd0 : regs[reg_rb];
 
    reg [3:0]                  micro_res_addr;
    
@@ -203,8 +203,8 @@ module wb_oisc (
          op_b <= 0;
       end else begin
          if (!(state[FETCH_INSTR_BIT] && !wb_ack_i)) begin
-            op_a <= regs[reg_ra];
-            op_b <= regs[reg_rb];
+            op_a <= wire_a;
+            op_b <= wire_b;
          end
       end
       
@@ -263,25 +263,6 @@ module wb_oisc (
          regs[61] <= 32'd0;         // X29
          regs[62] <= 32'd0;         // X30
          regs[63] <= 32'd0;         // X31
-
-         // all unused/zero registers
-         regs[16] <= 32'd0;         // 
-         regs[17] <= 32'd0;         // 
-         regs[18] <= 32'd0;         // 
-         regs[19] <= 32'd0;         // 
-         regs[20] <= 32'd0;         // 
-         regs[21] <= 32'd0;         // 
-         regs[22] <= 32'd0;         // 
-         regs[23] <= 32'd0;         // 
-         regs[24] <= 32'd0;         // 
-         regs[25] <= 32'd0;         // 
-         regs[26] <= 32'd0;         // 
-         regs[27] <= 32'd0;         // 
-         regs[28] <= 32'd0;         // 
-         regs[29] <= 32'd0;         // 
-         regs[30] <= 32'd0;         // 
-         regs[31] <= 32'd0;         // 
-         regs[32] <= 32'd0;         // X0
       end else begin
          if (reg_we) begin
             regs[reg_wa] <= reg_wdata;	    
