@@ -25,6 +25,13 @@ module wb_spi(
                output wire        spi_data_o
                );
 
+   /* verilator lint_off UNUSEDSIGNAL */
+   wire [31:7] dummy1;
+   assign dummy1 = adr_i[31:7];
+   wire [3:0] dummy2;
+   assign dummy2 = adr_i[3:0];
+   /* verilator lint_on UNUSEDSIGNAL */
+
    localparam                     S_IDLE = 0;
    localparam                     S_SENDING = 1;
 

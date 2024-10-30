@@ -20,6 +20,15 @@ module wb_imem(
                output wire        spi_data_o
                );
 
+   /* verilator lint_off UNUSEDSIGNAL */
+  wire [31:24] dummy1;
+  assign dummy1 = adr_i[31:24];
+   wire [31:0] dummy2;
+   assign dummy2 = dat_i[31:0];
+   wire [3:0] dummy3;
+   assign dummy3 = sel_i;
+   /* verilator lint_on UNUSEDSIGNAL */
+
    localparam                     S_IDLE = 2'd0;
    localparam                     S_SENDING = 2'd1;
    localparam                     S_RECEIVING = 2'd2;
