@@ -32,7 +32,7 @@
 module wb_bram #
   (
    parameter DATA_WIDTH = 32, // width of data bus in bits (8, 16, 32, or 64)
-   parameter ADDR_WIDTH = 11, // width of address bus in bits
+   parameter ADDR_WIDTH = 10, // width of address bus in bits
    parameter SELECT_WIDTH = (DATA_WIDTH/8) // width of word select bus (1, 2, 4, or 8)
    )
    (
@@ -47,6 +47,11 @@ module wb_bram #
     output wire                   ack_o, // ACK_O acknowledge output
     input wire                    cyc_i    // CYC_I cycle input
     );
+
+   /* verilator lint_off UNUSEDSIGNAL */
+   wire [(ADDR_WIDTH - VALID_ADDR_WIDTH - 1):0] dummy1;
+   assign dummy1 = adr_i[(ADDR_WIDTH - VALID_ADDR_WIDTH - 1):0];
+   /* verilator lint_on UNUSEDSIGNAL */
 
    // for interfaces that are more than one word wide, disable address lines
    parameter                      VALID_ADDR_WIDTH = ADDR_WIDTH - $clog2(SELECT_WIDTH);
@@ -66,7 +71,7 @@ module wb_bram #
    assign dat_o = dat_o_reg;
    assign ack_o = ack_o_reg;
 
-   integer                        i, j;
+   integer                        i;
 
    always @(posedge clk) begin
       ack_o_reg <= 1'b0;

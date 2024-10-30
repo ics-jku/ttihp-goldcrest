@@ -85,12 +85,12 @@ module top_ihp(
                 .wb_dat_o(wb_dato),
                 .wb_adr_o(wb_adr));
 
-   wire                         wb_cyc_ram = wb_adr[`SPI_RAM_BIT];
-   wire                         wb_cyc_rom = wb_adr[`SPI_ROM_BIT];
-   wire                         wb_cyc_uart = wb_adr[`UART_BIT];
-   wire                         wb_cyc_gpio = wb_adr[`GPIO_BIT];
-   wire                         wb_cyc_spi = wb_adr[`SPI_BIT];
-   wire                         wb_cyc_bram = wb_adr[`BRAM_BIT];
+   wire                         wb_cyc_ram = wb_cyc & wb_adr[`SPI_RAM_BIT];
+   wire                         wb_cyc_rom = wb_cyc & wb_adr[`SPI_ROM_BIT];
+   wire                         wb_cyc_uart = wb_cyc & wb_adr[`UART_BIT];
+   wire                         wb_cyc_gpio = wb_cyc & wb_adr[`GPIO_BIT];
+   wire                         wb_cyc_spi = wb_cyc & wb_adr[`SPI_BIT];
+   wire                         wb_cyc_bram = wb_cyc & wb_adr[`BRAM_BIT];
 
    wire                         wb_ack_gpio;
    wire                         wb_ack_uart;
@@ -201,7 +201,7 @@ module top_ihp(
                );
 
    wb_bram wb_bram(.clk(clk),
-              .adr_i(wb_adr[10:0]),
+              .adr_i(wb_adr[9:0]),
               .dat_i(wb_dato),
               .dat_o(wb_dati_bram),
               .we_i(wb_we),

@@ -20,6 +20,11 @@ module wb_emem(
                output wire        spi_data_o
                );
 
+   /* verilator lint_off UNUSEDSIGNAL */
+   wire [31:24] dummy1;
+   assign dummy1 = adr_i[31:24];
+   /* verilator lint_on UNUSEDSIGNAL */
+
 	// FSM
 	localparam
 		S_STARTUP 	    = 4'b0000,
