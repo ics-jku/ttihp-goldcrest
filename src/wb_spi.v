@@ -1,8 +1,8 @@
 `ifndef __WB_SPI__
 `define __WB_SPI__
-`define SPI_1_BIT 27
-`define SPI_2_BIT 26
-`define SPI_3_BIT 25
+`define SPI_1_BIT 4
+`define SPI_2_BIT 5
+`define SPI_3_BIT 6
 
 module wb_spi(
                input wire         clk,

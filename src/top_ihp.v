@@ -6,14 +6,14 @@
 `include "wb_spi.v"
 `include "wb_uart.v"
 `include "wb_oisc.v"
+`include "wb_bram.v"
 
 `define SPI_RAM_BIT 31
 `define SPI_ROM_BIT 30
 `define UART_BIT 29
 `define GPIO_BIT 28
-`define SPI1_BIT 27
-`define SPI2_BIT 26
-`define SPI3_BIT 25
+`define BRAM_BIT 27
+`define SPI_BIT 26
 
 module top_ihp(
               input wire        clk,
@@ -70,10 +70,9 @@ module top_ihp(
    // 1000000000000000_0000000000000000 SPI_RAM (0x80000000)
    // 0100000000000000_0000000000000000 SPI_ROM (0x40000000)
    // 0010000000000000_0000000000000000 UART    (0x20000000)
-   // 0001000000000000_0000000000000000 GPIO    (0x10000000) # unused for now
-   // 0000100000000000_0000000000000000 SPI1    (0x08000000)
-   // 0000010000000000_0000000000000000 SPI2    (0x04000000)
-   // 0000001000000000_0000000000000000 SPI3    (0x02000000)
+   // 0001000000000000_0000000000000000 GPIO    (0x10000000)
+   // 0000100000000000_0000000000000000 BRAM    (0x08000000)
+   // 0000010000000000_0000000000000000 SPI     (0x04000000)
 
    wb_oisc oisc(.clk(clk),
 		.rst_n(rst_n),
@@ -90,19 +89,22 @@ module top_ihp(
    wire                         wb_cyc_rom = wb_adr[`SPI_ROM_BIT];
    wire                         wb_cyc_uart = wb_adr[`UART_BIT];
    wire                         wb_cyc_gpio = wb_adr[`GPIO_BIT];
-   wire                         wb_cyc_spi = wb_adr[`SPI1_BIT] | wb_adr[`SPI2_BIT] | wb_adr[`SPI3_BIT];
+   wire                         wb_cyc_spi = wb_adr[`SPI_BIT];
+   wire                         wb_cyc_bram = wb_adr[`BRAM_BIT];
 
    wire                         wb_ack_gpio;
    wire                         wb_ack_uart;
    wire                         wb_ack_rom;
    wire                         wb_ack_ram;
    wire                         wb_ack_spi;
+   wire                         wb_ack_bram;
 
    wire [31:0]                  wb_dati_uart;
    wire [31:0]                  wb_dati_gpio;
    wire [31:0]                  wb_dati_rom;
    wire [31:0]                  wb_dati_ram;
    wire [31:0]                  wb_dati_spi;
+   wire [31:0]                  wb_dati_bram;
 
    assign      wb_ack = wb_ack_uart |
                         wb_ack_gpio |
@@ -113,7 +115,8 @@ module top_ihp(
                          wb_ack_gpio ? wb_dati_gpio :
                          wb_ack_rom ? wb_dati_rom : 
                          wb_ack_ram ? wb_dati_ram : 
-                         wb_ack_spi ? wb_dati_spi : 0;
+                         wb_ack_spi ? wb_dati_spi : 
+                         wb_ack_bram ? wb_dati_bram : 0;
 
    wb_uart wb_uart(.clk(clk),
                    .rst_n(rst_n),
@@ -196,6 +199,16 @@ module top_ihp(
                .gpio_i(gpio_i),
                .gpio_o(gpio_o)
                );
+
+   wb_bram wb_bram(.clk(clk),
+              .adr_i(wb_adr[11:0]),
+              .dat_i(wb_dato),
+              .dat_o(wb_dati_bram),
+              .we_i(wb_we),
+              .sel_i(wb_sel),
+              .stb_i(wb_stb),
+              .ack_o(wb_ack_bram),
+              .cyc_i(wb_cyc_bram));
 
 endmodule
 `endif
