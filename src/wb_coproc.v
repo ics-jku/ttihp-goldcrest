@@ -36,9 +36,9 @@ module wb_coproc(
    reg [31:0]                     opa;
    reg [31:0]                     opb;
 
-   wire [31:0]                    res_sll = opa << opb[4:0];
+   wire [31:0]                    res_sll = 32'd0; // opa << opb[4:0];
    wire [31:0]                    res_srl = opa >> opb[4:0];
-   wire [31:0]                    res_sra = $signed(opa) >>> opb[4:0];
+   wire [31:0]                    res_sra = 32'd0; // $signed(opa) >>> opb[4:0];
    wire [31:0]                    res_and = opa & opb;
    wire [31:0]                    res_or  = opa | opb;
    wire [31:0]                    res_xor = opa ^ opb;
