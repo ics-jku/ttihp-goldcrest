@@ -4,6 +4,9 @@
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
+from cocotbext.spi import SpiBus
+
+from spi_imem import SpiIMem
 
 
 @cocotb.test()
@@ -14,6 +17,9 @@ async def test_project(dut):
     clock = Clock(dut.clk, 50, units="ns")
     cocotb.start_soon(clock.start())
 
+    spi_bus = SpiBus.from_prefix(dut, "spi")
+    spi_imem = SpiIMem(spi_bus)
+
     # Reset
     dut._log.info("Reset")
     dut.ena.value = 1
@@ -21,15 +27,4 @@ async def test_project(dut):
     await ClockCycles(dut.clk, 10)
     dut.rst_n.value = 1
 
-    dut._log.info("Test project behavior")
-
-    # Set the input values you want to test
-
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
-
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+    await ClockCycles(dut.clk, 900)

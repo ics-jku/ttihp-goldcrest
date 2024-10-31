@@ -4,7 +4,12 @@
 /* This testbench just instantiates the module and makes some convenient wires
    that can be driven / tested by the cocotb test.py.
 */
-module tb ();
+module tb (
+           output wire spi_sclk,
+           output wire spi_mosi,
+           output wire spi_cs,
+           input wire spi_miso
+);
 
   // Dump the signals to a VCD file. You can view it with gtkwave.
   initial begin
@@ -23,9 +28,17 @@ module tb ();
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
 
+   assign spi_sclk = uo_out[1];
+   assign spi_mosi = uo_out[2];
+   assign spi_cs = uo_out[3];
+
+   wire [7:0] ui_in_int = {ui_in[7:2], spi_miso, ui_in[0]};
+
+
+
   // Replace tt_um_example with your module name:
   tt_um_froith_goldcrest user_project (
-      .ui_in  (ui_in),    // Dedicated inputs
+      .ui_in  (ui_in_int),    // Dedicated inputs
       .uo_out (uo_out),   // Dedicated outputs
       .uio_in (uio_in),   // IOs: Input path
       .uio_out(uio_out),  // IOs: Output path
