@@ -1,0 +1,59 @@
+(load "tb.vcd")
+
+(alias clk 'tb.user_project.top_ihp.oisc.clk)
+(alias rst_n 'tb.user_project.top_ihp.oisc.rst_n)
+(alias state 'tb.user_project.top_ihp.oisc.state)
+(alias micro_op 'tb.user_project.top_ihp.oisc.micro_op)
+(alias micro_state 'tb.user_project.top_ihp.oisc.micro_state)
+(alias decoder_inst 'tb.user_project.top_ihp.oisc.decoder.instruction)
+
+;; we have no case in the new wal version, use nested ifs
+(defun micro-reg [reg]
+  (if (= reg 0) "TMP0"
+  (if (= reg 1) "RVPC"
+  (if (= reg 2) "SRC1"
+  (if (= reg 3) "TMP1"
+  (if (= reg 4) "SRC2"
+  (if (= reg 5) "TMP2"
+  (if (= reg 6) "TMP3"
+  (if (= reg 7) "TMP4"
+  (if (= reg 8) "IMMI"
+  (if (= reg 9) "TMP5"
+  (if (= reg 10) " ONE"
+  (if (= reg 11) "WORD"
+  (if (= reg 12) " INC"
+  (if (= reg 13) "NEXT"
+  (if (= reg 14) "TMP6"
+  (if (= reg 15) "TMP7" "???")))))))))))))))))
+
+(defun state-name [state]
+  (if (= state 0) "FETCH_RVPC"
+  (if (= state 1) "FETCH_INSTR"
+  (if (= state 2) "DECODE_INSTR"
+  (if (= state 4) "PLACE_SRC1"
+  (if (= state 8) "PLACE_SRC2"
+  (if (= state 16) "PLACE_IMMI"
+  (if (= state 32) "EXECUTE"
+  (if (= state 64) "MEMORY"
+  (if (= state 128) "WRITE_BACK" "???"))))))))))
+
+(defun micro-jump [target]
+  (if (= target 1) "" (if (= target 255) "EXIT" target)))
+
+(defun print-subleq [inst]
+  (let ([src1 (slice inst 15 12)] [src2 (slice inst 11 8)] [jump (slice inst 7 0)])
+       (print "    " (micro-reg src1) " " (micro-reg src2) " " (micro-jump jump))))
+
+(while (= 0 rst_n) (step))
+
+(whenever (rising clk)
+  (when (!= state state@-2)
+	    (print "* " (state-name state)))
+
+  ;; Decoder
+  (when (= state 4)
+		(print "Next RV32I insst -> " decoder_inst))
+
+  ;; Print all retired microcode instructions
+  (when (= micro_state 2)
+	    (print-subleq micro_op)))

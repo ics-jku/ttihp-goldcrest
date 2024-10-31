@@ -27,7 +27,10 @@ class SpiIMem(SpiSlaveBase):
 
         cmd = await self._shift(8)
         adr = await self._shift(24)
+        adr = adr >> 2
+        # print(f"Got cmd {cmd} adr {adr} = 0x{self.content}")
         self.content = self.mem[adr]
+
         await self._shift(32, tx_word=self.content)
 
         await frame_end
