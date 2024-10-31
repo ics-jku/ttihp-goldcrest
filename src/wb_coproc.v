@@ -1,12 +1,12 @@
 `ifndef __WB_COPROC__
 `define __WB_COPROC__
 
-`define SLL 5'h08
-`define SRL 5'h0C
-`define SRA 5'h10
-`define AND 5'h14
-`define OR 5'h18
-`define XOR 5'h1C
+`define OPA 5'h00
+`define OPB 5'h04
+`define SRL 5'h08
+`define AND 5'h0C
+`define OR 5'h10
+`define XOR 5'h14
 
 module wb_coproc(
                input wire         clk,
@@ -20,25 +20,20 @@ module wb_coproc(
                output reg         ack_o  // ACK_O acknowledge output
                );
 
-
    // Memory Map
    // WRITE ONLY
    // 0x00: op a
    // 0x04: op b
    // READ ONLY
-   // 0x08: sll
-   // 0x0C: slr
-   // 0x10: sla
-   // 0x14: and
-   // 0x18: or
-   // 0x1C: xor
+   // 0x08: slr
+   // 0x0C: and
+   // 0x10: or
+   // 0x14: xor
 
    reg [31:0]                     opa;
    reg [31:0]                     opb;
 
-   wire [31:0]                    res_sll = 32'd0; // opa << opb[4:0];
    wire [31:0]                    res_srl = opa >> opb[4:0];
-   wire [31:0]                    res_sra = 32'd0; // $signed(opa) >>> opb[4:0];
    wire [31:0]                    res_and = opa & opb;
    wire [31:0]                    res_or  = opa | opb;
    wire [31:0]                    res_xor = opa ^ opb;
@@ -60,9 +55,7 @@ module wb_coproc(
                end
             end else begin
                casez (adr_i[4:0])
-                 `SLL: dat_o <= res_sll;
                  `SRL: dat_o <= res_srl;
-                 `SRA: dat_o <= res_sra;
                  `AND: dat_o <= res_and;
                  `OR : dat_o <= res_or;
                  `XOR: dat_o <= res_xor;

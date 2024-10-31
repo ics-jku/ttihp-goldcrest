@@ -22,17 +22,17 @@
 `define MICRO_REGS(DEST) {2'b00, DEST}
 
 module wb_oisc (
-	                                input wire         clk,
-	                                input wire         rst_n,
+                input wire         clk,
+                input wire         rst_n,
 
-                                        input wire         wb_ack_i,
-                                        input wire [31:0]  wb_dat_i,
-	                                output wire        wb_cyc_o,
-                                        output wire        wb_stb_o,
-                                        output wire [3:0]  wb_sel_o,
-                                        output wire        wb_we_o,
-                                        output reg [31:0]  wb_dat_o,
-                                        output wire [31:0] wb_adr_o);
+                input wire         wb_ack_i,
+                input wire [31:0]  wb_dat_i,
+                output wire        wb_cyc_o,
+                output wire        wb_stb_o,
+                output wire [3:0]  wb_sel_o,
+                output wire        wb_we_o,
+                output reg [31:0]  wb_dat_o,
+                output wire [31:0] wb_adr_o);
 
    /* verilator lint_off UNUSEDSIGNAL */
    wire dummy1;
@@ -186,7 +186,6 @@ module wb_oisc (
 
    // process for reading from the microcode ROM
    always @(posedge clk or negedge rst_n) begin
-      
       if (!rst_n) begin
          micro_op <= 0;
       end else begin
@@ -215,7 +214,7 @@ module wb_oisc (
       if (!rst_n) begin
          // SUBLEQ REGS
          regs[0] <= 32'd0;          // TMP0
-         regs[1]  <= 32'h40000000;  // RISC-V pc
+         regs[1] <= 32'h40000000;   // RISC-V pc
          regs[2] <= 32'd0;          // SRC1
          regs[3] <= 32'd0;          // TMP1
          regs[4] <= 32'd0;          // SRC2
@@ -233,7 +232,7 @@ module wb_oisc (
 
          // RISC-V REGS
          regs[33] <= 32'd0;         // X1
-         regs[34] <= 32'h08008000;  // RISC-V sp
+         regs[34] <= 32'h80008000;  // RISC-V sp
          regs[35] <= 32'h80000800;  // RISC-V gp
          regs[36] <= 32'd0;         // X4
          regs[37] <= 32'd0;         // X5
