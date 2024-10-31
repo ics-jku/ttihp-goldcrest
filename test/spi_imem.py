@@ -2,7 +2,7 @@ from cocotbext.spi import SpiMaster, SpiBus, SpiConfig, SpiSlaveBase
 import struct
 
 class SpiIMem(SpiSlaveBase):
-    def __init__(self, bus):
+    def __init__(self, bus, program):
         self._config = SpiConfig(
             word_width = 32,
             cpha = True,
@@ -11,11 +11,8 @@ class SpiIMem(SpiSlaveBase):
         self.content = 0
         super().__init__(bus)
 
-        self.mem = [
-            0x93000000,
-            0x93801000,
-            0x6ff0dfff,
-        ]
+        with open(program) as f:
+            self.mem = list(map(lambda x: int(x, 16), f.readlines()))
 
     async def get_content(self):
         await self.idle.wait()
