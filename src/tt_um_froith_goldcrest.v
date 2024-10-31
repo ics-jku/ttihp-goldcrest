@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2024 Your Name
+ * Copyright (c) 2022 Lucas Klemmer
+ * Copyright (c) 2022 Felix Roithmayr
  * SPDX-License-Identifier: Apache-2.0
  */
 

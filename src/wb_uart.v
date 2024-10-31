@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2022 Lucas Klemmer
+ * Copyright (c) 2022 Felix Roithmayr
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 `ifndef __WB_UART__
 `define __WB_UART__
 `include "uart_tx.v"

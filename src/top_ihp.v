@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2022 Lucas Klemmer
+ * Copyright (c) 2022 Felix Roithmayr
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 `ifndef __TOP_IHP__
 `define __TOP_IHP__
 `include "wb_emem.v"

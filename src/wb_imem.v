@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2022 Lucas Klemmer
+ * Copyright (c) 2022 Felix Roithmayr
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 `ifndef __WB_IMEM__
 `define __WB_IMEM__
 
@@ -21,8 +27,8 @@ module wb_imem(
                );
 
    /* verilator lint_off UNUSEDSIGNAL */
-  wire [31:24] dummy1;
-  assign dummy1 = adr_i[31:24];
+   wire [31:24] dummy1;
+   assign dummy1 = adr_i[31:24];
    wire [31:0] dummy2;
    assign dummy2 = dat_i[31:0];
    wire [3:0] dummy3;

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2022 Daniel Pekarek
+ * Copyright (c) 2022 Lucas Klemmer
+ * Copyright (c) 2022 Felix Roithmayr
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 `ifndef __UART_RX__
 `define __UART_RX__
 

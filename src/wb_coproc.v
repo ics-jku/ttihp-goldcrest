@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024 Lucas Klemmer
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 `ifndef __WB_COPROC__
 `define __WB_COPROC__
 
