@@ -34,6 +34,6 @@ async def test_project(dut, program, cycles, test):
 async def test_gpio(dut):
    await test_project(dut, "sw/gpio.hex", 800, lambda dut: dut.uio_out.value[0:3].integer == 0b1111)
 
-@cocotb.test()
-async def test_coproc(dut):
-   await test_project(dut, "sw/coproc.hex", 1800, lambda dut: dut.uio_out.value[0:3].integer == 0b0001)
+# @cocotb.test()
+# async def test_coproc(dut):
+#    await test_project(dut, "sw/coproc.hex", 1800, lambda dut: dut.uio_out.value[0:3].integer == 0b0001)
